@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -35,4 +36,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+// ソーシャルログイン
+Route::prefix('login/{provider}')->where(['provider' => '(line|github)'])->group(function () {
+    Route::get('/', [LoginController::class, 'redirectToProvider'])->name('social_login.redirect');
+    Route::get('/callback', [LoginController::class, 'handleProviderCallback'])->name('social_login.callback');
+});
+
+require __DIR__ . '/auth.php';
