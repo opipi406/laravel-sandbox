@@ -22,19 +22,24 @@ class LoginController extends Controller
     {
 
         $provider = $request->provider;
-        $social_user = Socialite::driver($provider)->user();
-        $social_email = $social_user->getEmail();
-        $social_name = $social_user->getName();
+        $provider_user = Socialite::driver($provider)->user();
 
-        if (!is_null($social_email)) {
+        $user = User::where('line_id', $provider_user->getId())->first();
 
-            $user = User::firstOrCreate([
-                'email' => $social_email
-            ], [
-                'email' => $social_email,
-                'name' => $social_name,
-                'password' => Hash::make("qweqweqwe")
-            ]);
+        $provider_user_email = $provider_user->getEmail();
+        $provider_user_name = $provider_user->getName();
+        $social_id = $provider_user->getId();
+
+        if (!is_null($provider_user_email)) {
+
+            if (!$user) {
+                $user = User::create([
+                    'name' => $provider_user_name,
+                    'email' => $provider_user_email,
+                    'password' => Hash::make("qweqweqwe"),
+                    'line_id' => $social_id,
+                ]);
+            }
 
             auth()->login($user);
             return redirect('/dashboard');
